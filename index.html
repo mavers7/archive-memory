@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archive Memory — Cultural Archive Platform</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;cursor:none}
+html{scroll-behavior:smooth}
+body{background:#0a0a0a;color:#f5f4f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+#cursor{position:fixed;top:0;left:0;width:16px;height:16px;pointer-events:none;z-index:9999;mix-blend-mode:difference;will-change:transform;transform:translate3d(-100px,-100px,0)}
+#cursor::before,#cursor::after{content:'';position:absolute;background:#f5f4f0}
+#cursor::before{top:50%;left:0;right:0;height:1px;transform:translateY(-50%)}
+#cursor::after{left:50%;top:0;bottom:0;width:1px;transform:translateX(-50%)}
+
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 48px;border-bottom:0.5px solid #222;background:#0a0a0a;position:sticky;top:0;z-index:100}
+.logo-wrap{display:flex;align-items:center;gap:14px;cursor:none}
+.logo-wrap svg{width:38px;height:28px}
+.logo-text{font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#f5f4f0}
+.nav-links{display:flex;gap:36px}
+.nav-links a{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#888;text-decoration:none;position:relative;padding:4px 0;transition:color 0.3s ease;cursor:none}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:0.5px;background:#f5f4f0;transition:width 0.3s ease}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+.nav-links a:hover,.nav-links a.active{color:#f5f4f0}
+
+.page{display:none}
+.page.active{display:block;animation:fadeIn 0.6s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.hero{padding:100px 48px 80px;border-bottom:0.5px solid #222;overflow:hidden}
+.hero-eyebrow{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#888;margin-bottom:28px;opacity:0;animation:rise 0.8s 0.1s ease forwards}
+.hero-title{font-size:clamp(56px,10vw,120px);font-weight:700;line-height:0.88;letter-spacing:-0.035em;text-transform:uppercase;margin-bottom:36px;max-width:1100px}
+.hero-title .line{display:block;overflow:hidden}
+.hero-title .line span{display:inline-block;opacity:0;transform:translateY(100%);animation:rise 0.9s ease forwards}
+.hero-title .line:nth-child(1) span{animation-delay:0.2s}
+.hero-title .line:nth-child(2) span{animation-delay:0.35s;color:#555}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.hero-sub{font-size:13px;color:#888;letter-spacing:0.06em;max-width:380px;line-height:1.9;opacity:0;animation:rise 0.8s 0.55s ease forwards}
+
+.trending-bar{display:flex;align-items:stretch;border-bottom:0.5px solid #222;height:48px;overflow:hidden}
+.trending-label{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:#888;padding:0 22px;border-right:0.5px solid #222;white-space:nowrap;min-width:130px;display:flex;align-items:center}
+.trending-scroll{display:flex;flex:1;overflow:hidden}
+.trending-track{display:flex;animation:scroll 45s linear infinite}
+.trending-track:hover{animation-play-state:paused}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.trending-item{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#f5f4f0;padding:0 28px;border-right:0.5px solid #222;white-space:nowrap;display:flex;align-items:center;gap:10px}
+.signal-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#f5f4f0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+
+.section-header{display:flex;justify-content:space-between;align-items:baseline;padding:36px 48px 20px;border-bottom:0.5px solid #222}
+.section-title{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#888}
+.section-count{font-size:10px;color:#333;letter-spacing:0.12em}
+
+.filters{display:flex;padding:0 48px;border-bottom:0.5px solid #222;overflow-x:auto}
+.filter-btn{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#888;padding:14px 20px;border:none;background:none;border-right:0.5px solid #222;transition:color 0.3s;white-space:nowrap;cursor:none}
+.filter-btn:hover,.filter-btn.active{color:#f5f4f0}
+.filter-btn:first-child{padding-left:0}
+
+.archive-grid{display:grid;grid-template-columns:repeat(3,1fr);border-left:0.5px solid #222}
+.archive-card{border-right:0.5px solid #222;border-bottom:0.5px solid #222;transition:background 0.2s ease;background:#0a0a0a;cursor:none}
+.archive-card:hover{background:#0d0d0d}
+.archive-card.hidden{display:none}
+.card-image{aspect-ratio:3/4;background:#111;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:0.5px solid #222}
+.card-image input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%;z-index:3;cursor:none}
+.card-image-placeholder{display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
+.card-image-placeholder svg{opacity:0.15}
+.card-image-placeholder span{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#888;opacity:0.5}
+.card-image img{width:100%;height:100%;object-fit:cover;display:none;transition:transform 0.6s ease}
+.card-image img.loaded{display:block}
+.archive-card:hover .card-image img.loaded{transform:scale(1.04)}
+.card-hover-overlay{position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;opacity:0;transition:opacity 0.4s ease;pointer-events:none;z-index:2}
+.archive-card:hover .card-hover-overlay{opacity:1}
+.card-hover-overlay span{font-size:9px;letter-spacing:0.2em;color:#f5f4f0;text-transform:uppercase}
+.card-meta{padding:18px 20px;cursor:none}
+.card-id{font-size:9px;letter-spacing:0.22em;color:#888;margin-bottom:6px;font-weight:500;text-transform:uppercase}
+.card-house{font-size:15px;font-weight:700;letter-spacing:-0.01em;margin-bottom:3px;text-transform:uppercase}
+.card-season{font-size:10px;color:#888;letter-spacing:0.08em;margin-bottom:14px;text-transform:uppercase}
+.card-signal{display:flex;align-items:center;gap:9px}
+.signal-label{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:#888}
+.signal-bars{display:flex;gap:3px;align-items:flex-end}
+.bar{width:3px;background:#333}
+.bar.active{background:#f5f4f0}
+.bar.trending.active{animation:pulse 2s infinite}
+
+.detail-panel{grid-column:1/-1;border-right:0.5px solid #222;border-bottom:0.5px solid #222;max-height:0;overflow:hidden;transition:max-height 0.5s ease;background:#0a0a0a}
+.detail-panel.open{max-height:700px}
+.detail-inner{display:grid;grid-template-columns:1fr 1fr}
+.detail-image-wrap{border-right:0.5px solid #222;aspect-ratio:3/4;background:#111;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+.detail-image-wrap input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%;z-index:3;cursor:none}
+.detail-image-wrap img{width:100%;height:100%;object-fit:cover;display:none}
+.detail-image-wrap img.loaded{display:block}
+.detail-content{padding:44px;display:flex;flex-direction:column;gap:26px;overflow-y:auto;max-height:600px}
+.detail-top{display:flex;justify-content:space-between;align-items:flex-start}
+.detail-close{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#888;background:none;border:none;padding:0;transition:color 0.3s;cursor:none}
+.detail-close:hover{color:#f5f4f0}
+.detail-id{font-size:9px;letter-spacing:0.22em;color:#888;margin-bottom:10px;text-transform:uppercase}
+.detail-title{font-size:30px;font-weight:700;letter-spacing:-0.02em;text-transform:uppercase;line-height:1;margin-bottom:6px}
+.detail-season{font-size:11px;color:#888;letter-spacing:0.12em;text-transform:uppercase}
+.divider{height:0.5px;background:#222}
+.detail-field label{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:#888;display:block;margin-bottom:10px}
+.detail-field p{font-size:12px;line-height:1.85;color:#bbb}
+.detail-field p+p{margin-top:12px}
+.detail-field strong{color:#f5f4f0;font-weight:500}
+.signal-full{display:flex;align-items:center;gap:14px;padding:14px 16px;border:0.5px solid #222}
+.tag-row{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;padding:6px 11px;border:0.5px solid #222;color:#888}
+
+.about-section{padding:72px 48px;display:grid;grid-template-columns:1fr 1fr;gap:72px;border-bottom:0.5px solid #222}
+.about-label{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:#888;margin-bottom:18px}
+.about-title{font-size:28px;font-weight:700;letter-spacing:-0.02em;text-transform:uppercase;line-height:1.1;margin-bottom:20px}
+.about-text{font-size:12px;color:#999;line-height:1.95}
+.phase-list{display:flex;flex-direction:column;gap:20px}
+.phase{border-top:0.5px solid #222;padding-top:16px}
+.phase-num{font-size:10px;font-weight:700;letter-spacing:0.15em;color:#f5f4f0;margin-bottom:6px;text-transform:uppercase}
+.phase-name{font-size:13px;font-weight:700;text-transform:uppercase;margin-bottom:6px;letter-spacing:-0.01em}
+.phase-desc{font-size:11px;color:#888;line-height:1.8}
+.contact-email{font-size:13px;font-weight:700;color:#f5f4f0;margin-top:12px;text-transform:uppercase;letter-spacing:-0.01em}
+
+.footer{padding:22px 48px;border-top:0.5px solid #222;display:flex;justify-content:space-between;align-items:center}
+.footer div{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#333}
+
+@media(max-width:768px){
+  nav{padding:18px 24px}
+  .hero{padding:60px 24px 48px}
+  .archive-grid{grid-template-columns:repeat(2,1fr)}
+  .detail-inner{grid-template-columns:1fr}
+  .about-section{grid-template-columns:1fr;gap:40px;padding:48px 24px}
+  .section-header,.filters{padding-left:24px;padding-right:24px}
+  .footer{padding:18px 24px;flex-direction:column;gap:8px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<nav>
+  <div class="logo-wrap" onclick="showPage('home')">
+    <svg viewBox="0 0 54 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="8" r="3.5" fill="#f5f4f0"/>
+      <circle cx="33" cy="8" r="3.5" fill="#f5f4f0"/>
+      <circle cx="48" cy="8" r="3.5" fill="#f5f4f0"/>
+      <circle cx="18" cy="21" r="3.5" fill="#f5f4f0"/>
+      <circle cx="36" cy="21" r="3.5" fill="#f5f4f0"/>
+      <circle cx="6" cy="34" r="3.5" fill="#f5f4f0"/>
+      <circle cx="24" cy="34" r="3.5" fill="#f5f4f0"/>
+      <circle cx="33" cy="34" r="3.5" fill="#f5f4f0"/>
+      <circle cx="48" cy="34" r="3.5" fill="#f5f4f0"/>
+    </svg>
+    <span class="logo-text">Archive Memory</span>
+  </div>
+  <div class="nav-links">
+    <a class="active" data-page="home" onclick="showPage('home')">Archive</a>
+    <a data-page="about" onclick="showPage('about')">About</a>
+    <a data-page="brands" onclick="showPage('brands')">For Brands</a>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-eyebrow">Cultural Archive — Fashion</div>
+    <div class="hero-title">
+      <span class="line"><span>Archive</span></span>
+      <span class="line"><span>Memory</span></span>
+    </div>
+    <div class="hero-sub">The cultural memory of fashion archive. Every garment, every season, every story.</div>
+  </div>
+
+  <div class="trending-bar">
+    <div class="trending-label">Trending now</div>
+    <div class="trending-scroll">
+      <div class="trending-track" id="trending-track">
+        <div class="trending-item"><span class="signal-dot"></span>Celine — FW2012 Trapeze Bag</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — SS2016 Belt Bag</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — FW2010 Luggage Tote</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — SS2019 Hedi Era Blazer</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — FW2013 Trio Bag</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — SS2021 Tabis</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Archive Index</div>
+    <div class="section-count" id="count-label">6 Records</div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" data-f="all" onclick="filterCards(this)">All</button>
+    <button class="filter-btn" data-f="philo" onclick="filterCards(this)">Philo Era</button>
+    <button class="filter-btn" data-f="slimane" onclick="filterCards(this)">Slimane Era</button>
+    <button class="filter-btn" data-f="rtw" onclick="filterCards(this)">Ready-to-wear</button>
+    <button class="filter-btn" data-f="acc" onclick="filterCards(this)">Accessories</button>
+  </div>
+
+  <div class="archive-grid" id="archive-grid"></div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div id="page-about" class="page">
+  <div class="hero">
+    <div class="hero-eyebrow">About Archive Memory</div>
+    <div class="hero-title" style="font-size:clamp(40px,7vw,80px)">
+      <span class="line"><span>Making the past</span></span>
+      <span class="line"><span>legible.</span></span>
+    </div>
+  </div>
+  <div class="about-section">
+    <div>
+      <div class="about-label">Mission</div>
+      <div class="about-title">Why Archive Memory exists</div>
+      <div class="about-text">Archive Memory was built to answer a single question: why does Generation Z desire garments from eras it never lived? The answer lies not in nostalgia, but in the search for cultural depth in a world of surface-level consumption.<br><br>We transform archive pieces from luxury fashion brands into detailed cultural records — giving Gen Z the vocabulary to understand what they feel, and why certain garments carry weight that new production cannot replicate.</div>
+    </div>
+    <div>
+      <div class="about-label">Methodology</div>
+      <div class="about-title">How we work</div>
+      <div class="about-text">Every piece in the Archive Memory index is selected through a dual process: historical research into the brand's creative legacy, and real-time monitoring of digital signals on TikTok and Vinted.<br><br>When a garment begins to emerge organically among Gen Z communities — a specific season trending, a designer being rediscovered — we document it, date it, and tell its story. Not as advertising. As cultural record.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOR BRANDS PAGE -->
+<div id="page-brands" class="page">
+  <div class="hero">
+    <div class="hero-eyebrow">For Brands</div>
+    <div class="hero-title" style="font-size:clamp(40px,7vw,80px)">
+      <span class="line"><span>Your archive</span></span>
+      <span class="line"><span>is your authority.</span></span>
+    </div>
+    <div class="hero-sub" style="margin-top:24px">Archive Memory offers a B2B service for luxury brands: archive cataloguing, trend monitoring, and cultural storytelling.</div>
+  </div>
+  <div class="about-section">
+    <div>
+      <div class="about-label">The service</div>
+      <div class="about-title">Four phases</div>
+      <div class="phase-list">
+        <div class="phase">
+          <div class="phase-num">01</div>
+          <div class="phase-name">Archive Audit</div>
+          <div class="phase-desc">Cataloguing and contextualisation of your existing archive. Every piece becomes a dated, documented cultural record.</div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">02</div>
+          <div class="phase-name">Trend Signal Report</div>
+          <div class="phase-desc">Real-time monitoring of TikTok and Vinted to identify which archive pieces are emerging organically among Gen Z before they peak.</div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">03</div>
+          <div class="phase-name">Campaign Generation</div>
+          <div class="phase-desc">Visual and copy assets based on identified archive pieces, optimised for Instagram and print.</div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">04</div>
+          <div class="phase-name">Strategy Delivery</div>
+          <div class="phase-desc">A complete strategic roadmap: timing, narrative, channel selection, and connection to Gen Z's nostalgic cycle.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="about-label">Contact</div>
+      <div class="about-title">Work with us</div>
+      <div class="about-text">Archive Memory works with a select number of luxury brands per year. If you believe your archive deserves to be heard, we'd like to listen.</div>
+      <div class="phase" style="margin-top:24px">
+        <div class="about-label" style="margin-bottom:0">Inquiries</div>
+        <div class="contact-email">studio@archivememory.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div>Archive Memory™ — Est. 2026</div>
+  <div>Cultural Archive — Fashion</div>
+</div>
+
+<script>
+const cards = [
+  {
+    id:"AM-001", house:"Celine", season:"FW 2010", era:"philo", cat:"acc",
+    designer:"Phoebe Philo",
+    signal:"trending", signalLabel:"Trending",
+    why:[
+      "The Luggage Tote arrived in FW2010 as one of the most radical bag designs of the decade — a structured, architectural object that borrowed its proportions from travel luggage rather than handbag tradition. Phoebe Philo's intention was a bag that looked like it belonged to a woman who was going somewhere, not one who was being looked at.",
+      "Its wide-set handles, stitched wings, and central zip created a silhouette immediately recognisable from across the room. The bag was produced in an extraordinary range of leathers and skins, each seasonal variation becoming a collectors' grail in its own right.",
+      "Gen Z's rediscovery of the Luggage is driven by its complete illegibility to fast fashion — the proportions, hardware weight, and leather quality are impossible to reproduce at scale, making originals immediately identifiable as the real thing."
+    ],
+    tags:["#oldceline","#phoebephilo","TikTok — 4.2M views","Vinted — 94 listings","Vestiaire — 142 listings"]
+  },
+  {
+    id:"AM-002", house:"Celine", season:"FW 2012", era:"philo", cat:"acc",
+    designer:"Phoebe Philo",
+    signal:"trending", signalLabel:"Trending",
+    why:[
+      "The Trapeze bag from FW2012 represented Philo's most overtly sculptural moment in accessories — a trapezoidal form with suede side panels and a central leather body that seemed to fold and unfold like an architectural study.",
+      "Where the Luggage was about mass and presence, the Trapeze was about geometry and restraint. It appeared on the FW2012 runway carried by models in oversized coats, functioning as a counterpoint to the volume above.",
+      "Among collectors, the Trapeze is now considered one of the defining objects of the Philo era — its relative scarcity on the secondary market compared to the Luggage makes it a higher-conviction archive piece for those who know."
+    ],
+    tags:["#celinearchive","#trapezebag","TikTok — 2.1M views","Vinted — 38 listings"]
+  },
+  {
+    id:"AM-003", house:"Celine", season:"SS 2016", era:"philo", cat:"acc",
+    designer:"Phoebe Philo",
+    signal:"rising", signalLabel:"Rising",
+    why:[
+      "The Belt Bag from SS2016 was Philo's answer to the body bag — a piece designed to be worn against the body, cinching the waist in a way that referenced both the fanny pack and the corset simultaneously.",
+      "Its buckled strap and minimal hardware made it the most wearable piece of the Philo era, accessible in proportion and scale where the Luggage could feel monumental. It was also one of the last pieces Philo designed before her departure in 2017.",
+      "Gen Z discovered the Belt Bag through TikTok styling content, where it appears frequently as the quieter, more everyday alternative to the Luggage. Its current Vinted pricing reflects a market beginning to fully recognise its rarity."
+    ],
+    tags:["#celinebeltbag","#philoceline","TikTok — 1.8M views","Vinted — 52 listings"]
+  },
+  {
+    id:"AM-004", house:"Celine", season:"SS 2019", era:"slimane", cat:"rtw",
+    designer:"Hedi Slimane",
+    signal:"rising", signalLabel:"Rising",
+    why:[
+      "Hedi Slimane's debut collection for Celine in SS2019 was one of the most discussed fashion moments of the decade — a complete erasure of the Philo aesthetic in favour of Slimane's signature skinny silhouette, rock references, and YSL-adjacent vocabulary.",
+      "The reaction was immediate and polarised. Fashion critics who had worshipped the Philo era were outraged. Slimane's supporters — and Celine's commercial stakeholders — pointed to the collection's clarity and commercial legibility.",
+      "Gen Z, discovering the SS2019 collection retrospectively through TikTok, reads it differently: not as a betrayal but as a document of a specific cultural moment, and an aesthetic that now feels period-specific in the best possible way."
+    ],
+    tags:["#hedislimane","#celineslimane","TikTok — 980K views","Vinted — 29 listings"]
+  },
+  {
+    id:"AM-005", house:"Celine", season:"FW 2013", era:"philo", cat:"acc",
+    designer:"Phoebe Philo",
+    signal:"trending", signalLabel:"Trending",
+    why:[
+      "The Trio bag from FW2013 was Philo's most democratic piece — a three-pocket clutch system that could be worn as a single large bag, a medium bag, or a small evening clutch, each component unzipping from the next.",
+      "Its price point was significantly lower than the Luggage, making it the entry-level piece for a generation of women who were discovering Philo but could not yet afford the larger bags. For many collectors, the Trio was their first Old Celine piece.",
+      "Today the Trio is one of the most actively traded pieces on Vinted and Vestiaire — its modularity, wearability, and strong brand recognition among Gen Z make it among the most accessible introduction points to the Philo archive."
+    ],
+    tags:["#celinetrio","#oldcelinebag","TikTok — 3.4M views","Vinted — 127 listings"]
+  },
+  {
+    id:"AM-006", house:"Celine", season:"SS 2021", era:"slimane", cat:"rtw",
+    designer:"Hedi Slimane",
+    signal:"low", signalLabel:"Low",
+    why:[
+      "The SS2021 collection was Slimane's most complete statement of intent for the house — a collection that fully committed to the rock-adjacent, youth-focused aesthetic he had been developing since his arrival, shot in Los Angeles with a cast of musicians and cultural figures.",
+      "The Tabi-inspired boots that appeared in this collection became one of the unexpected crossover moments of the Slimane era, appealing both to his existing audience and to a younger generation discovering the Maison Margiela Tabi through resale.",
+      "The SS2021 pieces represent an earlier and more affordable entry point into the Slimane archive, with Vinted listings currently priced well below the Philo-era equivalents — a window the market has not yet fully recognised."
+    ],
+    tags:["#celineSS21","#slimaneera","Vinted — 14 listings","TikTok — 420K views"]
+  }
+];
+
+function renderGrid(){
+  const grid = document.getElementById('archive-grid');
+  grid.innerHTML = '';
+  cards.forEach((c, i) => {
+    const bars = {trending:3, rising:2, low:1}[c.signal];
+    const tc = c.signal === 'trending' ? 'trending' : '';
+    grid.innerHTML += `
+      <div class="archive-card" data-era="${c.era}" data-cat="${c.cat}" data-idx="${i}">
+        <div class="card-image">
+          <input type="file" accept="image/*" onchange="previewImg(this,'cimg-${i}')">
+          <div class="card-image-placeholder">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f5f4f0" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>Upload image</span>
+          </div>
+          <img id="cimg-${i}" src="" alt="">
+          <div class="card-hover-overlay">
+            <span>${c.id}</span><span>${c.season}</span>
+          </div>
+        </div>
+        <div class="card-meta" onclick="openDetail(${i})">
+          <div class="card-id">${c.id}</div>
+          <div class="card-house">${c.house}</div>
+          <div class="card-season">${c.season}</div>
+          <div class="card-signal">
+            <div class="signal-bars">
+              <div class="bar ${bars>=1?'active':''} ${tc}" style="height:5px"></div>
+              <div class="bar ${bars>=2?'active':''} ${tc}" style="height:9px"></div>
+              <div class="bar ${bars>=3?'active':''} ${tc}" style="height:13px"></div>
+            </div>
+            <div class="signal-label">${c.signalLabel}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+renderGrid();
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const l = document.querySelector(`.nav-links a[data-page="${id}"]`);
+  if(l) l.classList.add('active');
+  closeDetail();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function filterCards(btn){
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const f = btn.dataset.f;
+  let count = 0;
+  document.querySelectorAll('.archive-card').forEach(c => {
+    const show = f==='all' || c.dataset.era===f || c.dataset.cat===f;
+    c.classList.toggle('hidden', !show);
+    if(show) count++;
+  });
+  document.getElementById('count-label').textContent = count + ' Record' + (count!==1?'s':'');
+  closeDetail();
+}
+
+let currentDetail = null;
+
+function openDetail(idx){
+  closeDetail();
+  const d = cards[idx];
+  const bars = {trending:3, rising:2, low:1}[d.signal];
+  const tc = d.signal==='trending' ? 'trending' : '';
+  const panel = document.createElement('div');
+  panel.className = 'detail-panel';
+  panel.innerHTML = `
+    <div class="detail-inner">
+      <div class="detail-image-wrap">
+        <input type="file" accept="image/*" onchange="previewDetailImg(this)">
+        <div class="card-image-placeholder" id="dph">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f5f4f0" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Upload image</span>
+        </div>
+        <img id="detail-img" src="" alt="">
+      </div>
+      <div class="detail-content">
+        <div class="detail-top">
+          <div>
+            <div class="detail-id">${d.id}</div>
+            <div class="detail-title">${d.house}</div>
+            <div class="detail-season">${d.season} — ${d.cat==='acc'?'Accessories':'Ready-to-wear'}</div>
+          </div>
+          <button class="detail-close" onclick="closeDetail()">Close ×</button>
+        </div>
+        <div class="divider"></div>
+        <div class="detail-field">
+          <label>Designer</label>
+          <p><strong>${d.designer}</strong></p>
+        </div>
+        <div class="detail-field">
+          <label>Why it matters</label>
+          ${d.why.map(p=>`<p>${p}</p>`).join('')}
+        </div>
+        <div class="detail-field">
+          <label>Cultural Signal</label>
+          <div class="signal-full">
+            <div class="signal-bars">
+              <div class="bar ${bars>=1?'active':''} ${tc}" style="height:8px"></div>
+              <div class="bar ${bars>=2?'active':''} ${tc}" style="height:12px"></div>
+              <div class="bar ${bars>=3?'active':''} ${tc}" style="height:16px"></div>
+            </div>
+            <div class="signal-label">${d.signalLabel} on TikTok and Vinted</div>
+          </div>
+        </div>
+        <div class="detail-field">
+          <label>Seen on</label>
+          <div class="tag-row">${d.tags.map(t=>`<div class="tag">${t}</div>`).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+
+  const cardEl = document.querySelector(`.archive-card[data-idx="${idx}"]`);
+  const visCards = Array.from(cardEl.parentNode.children).filter(c =>
+    c.classList.contains('archive-card') && !c.classList.contains('hidden')
+  );
+  const pos = visCards.indexOf(cardEl);
+  const rowEnd = visCards[Math.min(Math.floor(pos/3)*3+2, visCards.length-1)];
+  rowEnd.after(panel);
+  requestAnimationFrame(() => panel.classList.add('open'));
+  currentDetail = panel;
+  setTimeout(() => panel.scrollIntoView({behavior:'smooth', block:'nearest'}), 150);
+}
+
+function closeDetail(){
+  if(currentDetail){
+    currentDetail.classList.remove('open');
+    const p = currentDetail;
+    setTimeout(() => p.remove(), 500);
+    currentDetail = null;
+  }
+}
+
+function previewImg(input, imgId){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById(imgId);
+    img.src = e.target.result;
+    img.classList.add('loaded');
+    img.previousElementSibling.previousElementSibling.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewDetailImg(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('detail-img');
+    img.src = e.target.result;
+    img.classList.add('loaded');
+    document.getElementById('dph').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// Duplicate trending track for infinite scroll
+const track = document.getElementById('trending-track');
+track.innerHTML += track.innerHTML;
+
+// Cursor
+(function(){
+  const cursor = document.getElementById('cursor');
+  let raf = null;
+  let mx = -100, my = -100;
+  function update(){
+    cursor.style.transform = `translate3d(${mx-8}px,${my-8}px,0)`;
+    raf = null;
+  }
+  window.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    if(!raf) raf = requestAnimationFrame(update);
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
