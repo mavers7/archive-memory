@@ -172,12 +172,12 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:22px 4
     <div class="trending-label">Trending now</div>
     <div class="trending-scroll">
       <div class="trending-track" id="trending-track">
-        <div class="trending-item"><span class="signal-dot"></span>Lorem Ipsum</div>
-        <div class="trending-item"><span class="signal-dot"></span>Lorem Ipsum</div>
-        <div class="trending-item"><span class="signal-dot"></span>Lorem Ipsum</div>
-        <div class="trending-item"><span class="signal-dot"></span>Lorem Ipsum</div>
-        <div class="trending-item"><span class="signal-dot"></span>Lorem Ipsum</div>
-        <div class="trending-item"><span class="signal-dot"></span>Lorem Ipsum</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — FW2012 Trapeze Bag</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — SS2016 Belt Bag</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — FW2010 Luggage Tote</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — SS2019 Hedi Era Blazer</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — FW2013 Trio Bag</div>
+        <div class="trending-item"><span class="signal-dot"></span>Celine — SS2021 Tabis</div>
       </div>
     </div>
   </div>
@@ -189,8 +189,8 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:22px 4
 
   <div class="filters">
     <button class="filter-btn active" data-f="all" onclick="filterCards(this)">All</button>
-    <button class="filter-btn" data-f="philo" onclick="filterCards(this)">Phoebe Philo</button>
-    <button class="filter-btn" data-f="slimane" onclick="filterCards(this)">Hedi Slimane</button>
+    <button class="filter-btn" data-f="philo" onclick="filterCards(this)">Philo Era</button>
+    <button class="filter-btn" data-f="slimane" onclick="filterCards(this)">Slimane Era</button>
     <button class="filter-btn" data-f="rtw" onclick="filterCards(this)">Ready-to-wear</button>
     <button class="filter-btn" data-f="acc" onclick="filterCards(this)">Accessories</button>
   </div>
@@ -281,6 +281,8 @@ const cards = [
     id:"AM-001", house:"Celine", season:"FW 2010", era:"philo", cat:"acc",
     designer:"Phoebe Philo",
     signal:"trending", signalLabel:"Trending",
+    // ↓ Sostituisci con il tuo URL Cloudinary per AM-001
+    image:"",
     why:[
       "The Luggage Tote arrived in FW2010 as one of the most radical bag designs of the decade — a structured, architectural object that borrowed its proportions from travel luggage rather than handbag tradition. Phoebe Philo's intention was a bag that looked like it belonged to a woman who was going somewhere, not one who was being looked at.",
       "Its wide-set handles, stitched wings, and central zip created a silhouette immediately recognisable from across the room. The bag was produced in an extraordinary range of leathers and skins, each seasonal variation becoming a collectors' grail in its own right.",
@@ -297,7 +299,9 @@ const cards = [
       "Where the Luggage was about mass and presence, the Trapeze was about geometry and restraint. It appeared on the FW2012 runway carried by models in oversized coats, functioning as a counterpoint to the volume above.",
       "Among collectors, the Trapeze is now considered one of the defining objects of the Philo era — its relative scarcity on the secondary market compared to the Luggage makes it a higher-conviction archive piece for those who know."
     ],
-    tags:["#celinearchive","#trapezebag","TikTok — 2.1M views","Vinted — 38 listings"]
+    tags:["#celinearchive","#trapezebag","TikTok — 2.1M views","Vinted — 38 listings"],
+    // ↓ Sostituisci con il tuo URL Cloudinary per AM-002
+    image:""
   },
   {
     id:"AM-003", house:"Celine", season:"SS 2016", era:"philo", cat:"acc",
@@ -308,7 +312,9 @@ const cards = [
       "Its buckled strap and minimal hardware made it the most wearable piece of the Philo era, accessible in proportion and scale where the Luggage could feel monumental. It was also one of the last pieces Philo designed before her departure in 2017.",
       "Gen Z discovered the Belt Bag through TikTok styling content, where it appears frequently as the quieter, more everyday alternative to the Luggage. Its current Vinted pricing reflects a market beginning to fully recognise its rarity."
     ],
-    tags:["#celinebeltbag","#philoceline","TikTok — 1.8M views","Vinted — 52 listings"]
+    tags:["#celinebeltbag","#philoceline","TikTok — 1.8M views","Vinted — 52 listings"],
+    // ↓ Sostituisci con il tuo URL Cloudinary per AM-003
+    image:""
   },
   {
     id:"AM-004", house:"Celine", season:"SS 2019", era:"slimane", cat:"rtw",
@@ -319,7 +325,9 @@ const cards = [
       "The reaction was immediate and polarised. Fashion critics who had worshipped the Philo era were outraged. Slimane's supporters — and Celine's commercial stakeholders — pointed to the collection's clarity and commercial legibility.",
       "Gen Z, discovering the SS2019 collection retrospectively through TikTok, reads it differently: not as a betrayal but as a document of a specific cultural moment, and an aesthetic that now feels period-specific in the best possible way."
     ],
-    tags:["#hedislimane","#celineslimane","TikTok — 980K views","Vinted — 29 listings"]
+    tags:["#hedislimane","#celineslimane","TikTok — 980K views","Vinted — 29 listings"],
+    // ↓ Sostituisci con il tuo URL Cloudinary per AM-004
+    image:""
   },
   {
     id:"AM-005", house:"Celine", season:"FW 2013", era:"philo", cat:"acc",
@@ -330,7 +338,9 @@ const cards = [
       "Its price point was significantly lower than the Luggage, making it the entry-level piece for a generation of women who were discovering Philo but could not yet afford the larger bags. For many collectors, the Trio was their first Old Celine piece.",
       "Today the Trio is one of the most actively traded pieces on Vinted and Vestiaire — its modularity, wearability, and strong brand recognition among Gen Z make it among the most accessible introduction points to the Philo archive."
     ],
-    tags:["#celinetrio","#oldcelinebag","TikTok — 3.4M views","Vinted — 127 listings"]
+    tags:["#celinetrio","#oldcelinebag","TikTok — 3.4M views","Vinted — 127 listings"],
+    // ↓ Sostituisci con il tuo URL Cloudinary per AM-005
+    image:""
   },
   {
     id:"AM-006", house:"Celine", season:"SS 2021", era:"slimane", cat:"rtw",
@@ -341,7 +351,9 @@ const cards = [
       "The Tabi-inspired boots that appeared in this collection became one of the unexpected crossover moments of the Slimane era, appealing both to his existing audience and to a younger generation discovering the Maison Margiela Tabi through resale.",
       "The SS2021 pieces represent an earlier and more affordable entry point into the Slimane archive, with Vinted listings currently priced well below the Philo-era equivalents — a window the market has not yet fully recognised."
     ],
-    tags:["#celineSS21","#slimaneera","Vinted — 14 listings","TikTok — 420K views"]
+    tags:["#celineSS21","#slimaneera","Vinted — 14 listings","TikTok — 420K views"],
+    // ↓ Sostituisci con il tuo URL Cloudinary per AM-006
+    image:""
   }
 ];
 
@@ -351,15 +363,16 @@ function renderGrid(){
   cards.forEach((c, i) => {
     const bars = {trending:3, rising:2, low:1}[c.signal];
     const tc = c.signal === 'trending' ? 'trending' : '';
+    const imgContent = c.image
+      ? `<img src="${c.image}" alt="${c.house} ${c.season}" class="loaded">`
+      : `<div class="card-image-placeholder">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f5f4f0" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Image coming soon</span>
+        </div>`;
     grid.innerHTML += `
       <div class="archive-card" data-era="${c.era}" data-cat="${c.cat}" data-idx="${i}">
         <div class="card-image">
-          <input type="file" accept="image/*" onchange="previewImg(this,'cimg-${i}')">
-          <div class="card-image-placeholder">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f5f4f0" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span>Upload image</span>
-          </div>
-          <img id="cimg-${i}" src="" alt="">
+          ${imgContent}
           <div class="card-hover-overlay">
             <span>${c.id}</span><span>${c.season}</span>
           </div>
@@ -418,12 +431,13 @@ function openDetail(idx){
   panel.innerHTML = `
     <div class="detail-inner">
       <div class="detail-image-wrap">
-        <input type="file" accept="image/*" onchange="previewDetailImg(this)">
-        <div class="card-image-placeholder" id="dph">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f5f4f0" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <span>Upload image</span>
-        </div>
-        <img id="detail-img" src="" alt="">
+        ${d.image
+          ? `<img src="${d.image}" alt="${d.house} ${d.season}" class="loaded">`
+          : `<div class="card-image-placeholder" id="dph">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f5f4f0" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Image coming soon</span>
+            </div>`
+        }
       </div>
       <div class="detail-content">
         <div class="detail-top">
