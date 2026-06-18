@@ -351,7 +351,7 @@ function renderGrid(){
     const imgContent = firstImg
       ? '<img src="'+firstImg+'" alt="'+c.house+' '+c.piece+'">'
       : '<div class="card-image-placeholder"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f5f4f0" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Image coming soon</span></div>';
-    grid.innerHTML += '<div class="archive-card" data-cat="'+c.cat+'" data-idx="'+i+'"><div class="card-image">'+imgContent+'<div class="card-hover-overlay"><span>'+c.id+'</span><span>'+c.season+'</span></div></div><div class="card-meta" onclick="openDetail('+i+')"><div class="card-id">'+c.id+' &mdash; '+c.piece+'</div><div class="card-house">'+c.house+'</div><div class="card-season">'+c.season+'</div></div></div>';
+    grid.innerHTML += '<div class="archive-card" data-cat="'+c.cat+'" data-idx="'+i+'" onclick="openDetail('+i+')"><div class="card-image">'+imgContent+'<div class="card-hover-overlay"><span>'+c.id+'</span><span>'+c.season+'</span></div></div><div class="card-meta"><div class="card-id">'+c.id+' &mdash; '+c.piece+'</div><div class="card-house">'+c.house+'</div><div class="card-season">'+c.season+'</div></div></div>';
   });
 }
 renderGrid();
