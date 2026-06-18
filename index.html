@@ -93,11 +93,13 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:22px 4
 .detail-panel.open{max-height:900px}
 .detail-inner{display:grid;grid-template-columns:1fr 1fr}
 .detail-gallery{border-right:0.5px solid #222;background:#111;position:relative;display:flex;flex-direction:column;max-height:800px}
-.gallery-main{aspect-ratio:3/4;background:#111;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:0.5px solid #222}
+.gallery-main{aspect-ratio:3/4;background:#111;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
 .gallery-main img{width:100%;height:100%;object-fit:cover;display:block}
-.gallery-thumbs{display:flex;gap:0;background:#0d0d0d;overflow-x:auto;padding:0}
-.gallery-thumb{flex:1;min-width:80px;aspect-ratio:1/1;border:none;background:#111;border-right:0.5px solid #222;cursor:none;overflow:hidden;position:relative;opacity:0.55;transition:opacity 0.3s}
-.gallery-thumb:last-child{border-right:none}
+.gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(10,10,10,0.7);border:0.5px solid #f5f4f0;color:#f5f4f0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:none;transition:background 0.3s ease;z-index:3}
+.gallery-arrow:hover{background:rgba(245,244,240,0.15)}
+.gallery-arrow.prev{left:16px}
+.gallery-arrow.next{right:16px}
+.gallery-counter{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:0.2em;color:#f5f4f0;background:rgba(10,10,10,0.7);padding:6px 12px;z-index:3}
 .gallery-thumb:hover{opacity:0.85}
 .gallery-thumb.active{opacity:1}
 .gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -383,12 +385,6 @@ function openDetail(idx){
   const hasImages = d.images && d.images.length > 0;
   const mainImg = hasImages ? d.images[0] : null;
 
-  let thumbsHTML = '';
-  if(hasImages){
-    d.images.forEach((url, j) => {
-      thumbsHTML += '<button class="gallery-thumb '+(j===0?'active':'')+'" onclick="switchGalleryImage('+idx+', '+j+', this)"><img src="'+url+'" alt="'+d.piece+' '+(j+1)+'"></button>';
-    });
-  }
 
   const galleryMainContent = mainImg
     ? '<img id="gallery-main-img" src="'+mainImg+'" alt="'+d.piece+'">'
@@ -396,7 +392,15 @@ function openDetail(idx){
 
   const panel = document.createElement('div');
   panel.className = 'detail-panel';
-  panel.innerHTML = '<div class="detail-inner"><div class="detail-gallery"><div class="gallery-main">'+galleryMainContent+'</div>'+(hasImages && d.images.length > 1 ? '<div class="gallery-thumbs">'+thumbsHTML+'</div>' : '')+'</div><div class="detail-content"><div class="detail-top"><div><div class="detail-id">'+d.id+'</div><div class="detail-title">'+d.piece+'</div><div class="detail-season">'+d.house+' &mdash; '+d.season+'</div></div><button class="detail-close" onclick="closeDetail()">Close &times;</button></div><div class="divider"></div><div class="detail-field"><label>Designer</label><p><strong>'+d.designer+'</strong></p></div><div class="detail-field"><label>Why it matters</label>'+d.why.map(p=>'<p>'+p+'</p>').join('')+'</div></div></div>';
+  const arrowsHTML = (hasImages && d.images.length > 1) 
+  ? '<button class="gallery-arrow prev" onclick="changeGalleryImage('+idx+', -1)">‹</button><button class="gallery-arrow next" onclick="changeGalleryImage('+idx+', 1)">›</button><div class="gallery-counter"><span id="gallery-current">1</span> / '+d.images.length+'</div>'
+  : '';
+
+const arrowsHTML = (hasImages && d.images.length > 1) 
+  ? '<button class="gallery-arrow prev" onclick="changeGalleryImage('+idx+', -1)">‹</button><button class="gallery-arrow next" onclick="changeGalleryImage('+idx+', 1)">›</button><div class="gallery-counter"><span id="gallery-current">1</span> / '+d.images.length+'</div>'
+  : '';
+
+panel.innerHTML = '<div class="detail-inner"><div class="detail-gallery"><div class="gallery-main">'+galleryMainContent+arrowsHTML+'</div></div><div class="detail-content"><div class="detail-top"><div><div class="detail-id">'+d.id+'</div><div class="detail-title">'+d.piece+'</div><div class="detail-season">'+d.house+' &mdash; '+d.season+'</div></div><button class="detail-close" onclick="closeDetail()">Close &times;</button></div><div class="divider"></div><div class="detail-field"><label>Designer</label><p><strong>'+d.designer+'</strong></p></div><div class="detail-field"><label>Why it matters</label>'+d.why.map(p=>'<p>'+p+'</p>').join('')+'</div></div></div>';
 
   const cardEl = document.querySelector('.archive-card[data-idx="'+idx+'"]');
   const visCards = Array.from(cardEl.parentNode.children).filter(c =>
@@ -407,16 +411,21 @@ function openDetail(idx){
   rowEnd.after(panel);
   requestAnimationFrame(() => panel.classList.add('open'));
   currentDetail = panel;
+  currentGalleryIdx = 0;
   setTimeout(() => panel.scrollIntoView({behavior:'smooth', block:'nearest'}), 150);
 }
 
-function switchGalleryImage(cardIdx, imageIdx, thumbBtn){
+let currentGalleryIdx = 0;
+function changeGalleryImage(cardIdx, direction){
   const card = cards[cardIdx];
-  if(!card.images || !card.images[imageIdx]) return;
+  if(!card.images || card.images.length === 0) return;
+  currentGalleryIdx += direction;
+  if(currentGalleryIdx < 0) currentGalleryIdx = card.images.length - 1;
+  if(currentGalleryIdx >= card.images.length) currentGalleryIdx = 0;
   const mainImg = document.getElementById('gallery-main-img');
-  if(mainImg) mainImg.src = card.images[imageIdx];
-  document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-  thumbBtn.classList.add('active');
+  if(mainImg) mainImg.src = card.images[currentGalleryIdx];
+  const counter = document.getElementById('gallery-current');
+  if(counter) counter.textContent = currentGalleryIdx + 1;
 }
 
 function closeDetail(){
