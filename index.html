@@ -384,24 +384,15 @@ function openDetail(idx){
   const d = cards[idx];
   const hasImages = d.images && d.images.length > 0;
   const mainImg = hasImages ? d.images[0] : null;
-
-
   const galleryMainContent = mainImg
     ? '<img id="gallery-main-img" src="'+mainImg+'" alt="'+d.piece+'">'
     : '<div class="card-image-placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f5f4f0" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Image coming soon</span></div>';
-
   const panel = document.createElement('div');
   panel.className = 'detail-panel';
   const arrowsHTML = (hasImages && d.images.length > 1) 
-  ? '<button class="gallery-arrow prev" onclick="changeGalleryImage('+idx+', -1)">‹</button><button class="gallery-arrow next" onclick="changeGalleryImage('+idx+', 1)">›</button><div class="gallery-counter"><span id="gallery-current">1</span> / '+d.images.length+'</div>'
-  : '';
-
-const arrowsHTML = (hasImages && d.images.length > 1) 
-  ? '<button class="gallery-arrow prev" onclick="changeGalleryImage('+idx+', -1)">‹</button><button class="gallery-arrow next" onclick="changeGalleryImage('+idx+', 1)">›</button><div class="gallery-counter"><span id="gallery-current">1</span> / '+d.images.length+'</div>'
-  : '';
-
-panel.innerHTML = '<div class="detail-inner"><div class="detail-gallery"><div class="gallery-main">'+galleryMainContent+arrowsHTML+'</div></div><div class="detail-content"><div class="detail-top"><div><div class="detail-id">'+d.id+'</div><div class="detail-title">'+d.piece+'</div><div class="detail-season">'+d.house+' &mdash; '+d.season+'</div></div><button class="detail-close" onclick="closeDetail()">Close &times;</button></div><div class="divider"></div><div class="detail-field"><label>Designer</label><p><strong>'+d.designer+'</strong></p></div><div class="detail-field"><label>Why it matters</label>'+d.why.map(p=>'<p>'+p+'</p>').join('')+'</div></div></div>';
-
+    ? '<button class="gallery-arrow prev" onclick="changeGalleryImage('+idx+', -1)">‹</button><button class="gallery-arrow next" onclick="changeGalleryImage('+idx+', 1)">›</button><div class="gallery-counter"><span id="gallery-current">1</span> / '+d.images.length+'</div>'
+    : '';
+  panel.innerHTML = '<div class="detail-inner"><div class="detail-gallery"><div class="gallery-main">'+galleryMainContent+arrowsHTML+'</div></div><div class="detail-content"><div class="detail-top"><div><div class="detail-id">'+d.id+'</div><div class="detail-title">'+d.piece+'</div><div class="detail-season">'+d.house+' &mdash; '+d.season+'</div></div><button class="detail-close" onclick="closeDetail()">Close &times;</button></div><div class="divider"></div><div class="detail-field"><label>Designer</label><p><strong>'+d.designer+'</strong></p></div><div class="detail-field"><label>Why it matters</label>'+d.why.map(p=>'<p>'+p+'</p>').join('')+'</div></div></div>';
   const cardEl = document.querySelector('.archive-card[data-idx="'+idx+'"]');
   const visCards = Array.from(cardEl.parentNode.children).filter(c =>
     c.classList.contains('archive-card') && !c.classList.contains('hidden')
